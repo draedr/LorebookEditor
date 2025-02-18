@@ -6,7 +6,8 @@ export type { Entry, JsonData };
 
 export const storageItems = {
   jsonData: "jsonData",
-  loadedLorebook: "loadedLorebook"
+  loadedLorebook: "loadedLorebook",
+  originalLorebook: "originalLorebook"
 }
 
 export function useHooks() {
@@ -28,26 +29,34 @@ export function useHooks() {
     const selectedOption: JsonData = <JsonData>JSON.parse(localStorage.getItem(storageItems.jsonData) || "null") || emptyData;
     return selectedOption;
   };
+  const getOriginalDataState = () => {
+    const selectedOption: JsonData = <JsonData>JSON.parse(localStorage.getItem(storageItems.originalLorebook) || "null") || null;
+    return selectedOption;
+  };
   const getLoadedLorebookState = () => {
     const selectedOption: string | null = localStorage.getItem(storageItems.loadedLorebook) || null
     return selectedOption;
   };
 
-
   const [jsonData, setJsonDataSimple] = useState<JsonData | null>(getJsonDataState());
   const [loadedLorebook, setLoadedLorebookSimple] = useState<string | null>(getLoadedLorebookState());
+  const [originalData, setOriginalDataSimple] = useState<JsonData | null>(getOriginalDataState());
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
   const [tabIndex, setTabIndex] = useState(0);
 
-
-  const setJsonData = ( jsonData: JsonData ) => {
-      localStorage.setItem( storageItems.jsonData, JSON.stringify(jsonData) );
-      setJsonDataSimple({...jsonData});
+  const setJsonData = ( d: JsonData ) => {
+      localStorage.setItem( storageItems.jsonData, JSON.stringify(d) );
+      setJsonDataSimple({...d});
   }
 
-  const setLoadedLorebook = ( filename: string ) => {
-      localStorage.setItem( storageItems.loadedLorebook, filename );
-      setLoadedLorebookSimple(filename);
+  const setLoadedLorebook = ( f: string ) => {
+      localStorage.setItem( storageItems.loadedLorebook, f );
+      setLoadedLorebookSimple(f);
+  }
+
+  const setOriginalData = (d: JsonData) => {
+    localStorage.setItem( storageItems.originalLorebook, JSON.stringify(d) );
+    setOriginalDataSimple({...d});
   }
 
   const SyncFromStorage = () => {
@@ -59,15 +68,15 @@ export function useHooks() {
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log(file);
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
-          const data = JSON.parse(e.target?.result as string);
+          const data = <JsonData>JSON.parse(e.target?.result as string);
           setJsonData(data);
           setTabIndex(1); // Switch to Edit Entries tab
           setLoadedLorebook(file.name);
+          setOriginalData(data);
         } catch (error) {
           alert('Error parsing JSON file');
         }
@@ -76,6 +85,7 @@ export function useHooks() {
     }
   };
 
+  
   return {
     jsonData,
     setJsonData,
@@ -86,7 +96,9 @@ export function useHooks() {
     loadedLorebook,
     setLoadedLorebook,
     SyncFromStorage,
-    handleFileUpload
+    handleFileUpload,
+    originalData,
+    setOriginalData
   };
 }
 

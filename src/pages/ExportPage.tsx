@@ -1,24 +1,34 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Save, Trash2 } from 'lucide-react';
 import { HooksContext, storageItems } from '../hooks';
 
+import { JsonData } from '../types';
 
 export default function ExportPage() {
-  const { jsonData, setJsonData, setSelectedEntry, setTabIndex, loadedLorebook, setLoadedLorebook, SyncFromStorage, handleFileUpload } = useContext(HooksContext);
+  const { jsonData, setJsonData, setSelectedEntry, setTabIndex, loadedLorebook, setLoadedLorebook, SyncFromStorage, handleFileUpload, originalData, setOriginalData } = useContext(HooksContext);
 
-  const handleExport = () => {
-    if (!jsonData) return;
-    const dataStr = JSON.stringify(jsonData, null, 2);
+
+  const handleExportOriginal = () => {
+    handleExportGeneric(originalData);
+  }
+  
+  const handleExportModified = () => {
+    handleExportGeneric(jsonData);
+  }
+
+  const handleExportGeneric = (data: any) => {
+    if (!data) return;
+    const dataStr = JSON.stringify(data, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'exported_data.json';
+    a.download = loadedLorebook || 'exported_data.json';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  };
+  }
 
   const handleClearLorebook = () => {
     if (confirm('Are you sure you want to clear all data?')) {
@@ -29,8 +39,11 @@ export default function ExportPage() {
   };
 
   const handleClearStorage = () => {
+    setOriginalData(null);
     localStorage.removeItem(storageItems.jsonData);
     localStorage.removeItem(storageItems.loadedLorebook);
+    localStorage.removeItem(storageItems.originalLorebook); 
+    setShowOriginalLorebookExport(false);
   }
 
   const handleSyncToStorage = () => {
@@ -40,6 +53,22 @@ export default function ExportPage() {
     setLoadedLorebook(oldLoadedLorebook);
     setJsonData(oldJsonData);
   }
+
+  const isOriginalLorebookPresent = () => {
+    const isObj =  typeof originalData === 'object' && originalData !== null;
+    console.log(originalData);
+    console.log(isObj);
+
+    try {
+      const isJsonData: JsonData = (originalData as JsonData);
+      return isObj;
+    } catch (e: any) {
+      return false;
+    }
+  }
+  
+  const [showOriginalLorebookExport, setShowOriginalLorebookExport] = useState<boolean | null>(isOriginalLorebookPresent());
+  console.log(showOriginalLorebookExport);
 
   return (
       <div className="p-4 space-y-4">
@@ -52,7 +81,7 @@ export default function ExportPage() {
             {/* Export Lorebook */}
             <div>
               <button
-                onClick={handleExport}
+                onClick={handleExportModified}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 <Save className="mr-2 h-4 w-4" />
@@ -69,6 +98,19 @@ export default function ExportPage() {
                 Clear Lorebook
               </button>
             </div>
+            {/* Export Original Lorebook */}
+            {showOriginalLorebookExport == true && (
+              <div>
+              <button
+                disabled={showOriginalLorebookExport == true}
+                onClick={handleExportOriginal}
+                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              >
+                <Save className="mr-2 h-4 w-4" />
+                Export Original Lorebook
+              </button>
+            </div>
+            )}
             {/* Choose File */}
             <div>
               <input
