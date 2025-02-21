@@ -9,21 +9,27 @@ export default function ExportPage() {
 
 
   const handleExportOriginal = () => {
-    handleExportGeneric(originalData);
+    console.log(originalData);
+    handleExportGeneric(originalData, 'original_');
   }
   
   const handleExportModified = () => {
     handleExportGeneric(jsonData);
   }
 
-  const handleExportGeneric = (data: any) => {
+  const handleExportGeneric = (data: any, prefix: string | null = null) => {
     if (!data) return;
+
+    var filename = loadedLorebook || 'world.json';
+    if(prefix !== null && prefix !== '' && prefix !== undefined && filename !== ' ') {
+      filename = prefix + filename;
+    }
     const dataStr = JSON.stringify(data, null, 2);
     const blob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = loadedLorebook || 'exported_data.json';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -43,7 +49,6 @@ export default function ExportPage() {
     localStorage.removeItem(storageItems.jsonData);
     localStorage.removeItem(storageItems.loadedLorebook);
     localStorage.removeItem(storageItems.originalLorebook); 
-    setShowOriginalLorebookExport(false);
   }
 
   const handleSyncToStorage = () => {
@@ -54,21 +59,6 @@ export default function ExportPage() {
     setJsonData(oldJsonData);
   }
 
-  const isOriginalLorebookPresent = () => {
-    const isObj =  typeof originalData === 'object' && originalData !== null;
-    console.log(originalData);
-    console.log(isObj);
-
-    try {
-      const isJsonData: JsonData = (originalData as JsonData);
-      return isObj;
-    } catch (e: any) {
-      return false;
-    }
-  }
-  
-  const [showOriginalLorebookExport, setShowOriginalLorebookExport] = useState<boolean | null>(isOriginalLorebookPresent());
-  console.log(showOriginalLorebookExport);
 
   return (
       <div className="p-4 space-y-4">
@@ -99,17 +89,16 @@ export default function ExportPage() {
               </button>
             </div>
             {/* Export Original Lorebook */}
-            {showOriginalLorebookExport == true && (
+            { originalData !== null && originalData !== undefined && (
               <div>
-              <button
-                disabled={showOriginalLorebookExport == true}
-                onClick={handleExportOriginal}
-                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
-              >
-                <Save className="mr-2 h-4 w-4" />
-                Export Original Lorebook
-              </button>
-            </div>
+                <button
+                  onClick={handleExportOriginal}
+                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                >
+                  <Save className="mr-2 h-4 w-4" />
+                  Export Original Lorebook
+                </button>
+              </div>
             )}
             {/* Choose File */}
             <div>
