@@ -1,16 +1,17 @@
 import { useContext, useState } from 'react';
 import { HooksContext } from '../hooks';
-import { Plus, X } from 'lucide-react';
+import { PlusIcon, X } from 'lucide-react';
 
 import { Entry } from '/src/hooks.ts';
-import { UseGlobalOptions } from '/src/types.ts';
+import { UseGlobalOptionsArray, mapUseGlobalOptions } from '/src/types.ts';
+import { Button, Checkbox, Container, Flex, Grid, Input, NumberInput, Select, Switch, Textarea, TextInput, Title } from '@mantine/core';
+
 
 export default function EntryForm() {
   const { jsonData, selectedEntry, setSelectedEntry, setJsonData } =
     useContext(HooksContext);
 
   const [filter, setFilter] = useState<string | null>('');
-  const [filterContent, setFilterContent] = useState<boolean | null>(false);
 
   const filterEntries = () => {
     if(jsonData.entries === null || jsonData.entries === undefined) return [];
@@ -24,15 +25,15 @@ export default function EntryForm() {
         return true;
       }
 
-      if(filterContent && (entry as Entry).content.toLowerCase().includes(filter.toLowerCase())) {
+      if((entry as Entry).content.toLowerCase().includes(filter.toLowerCase())) {
         return true;
       }
 
-      if(filterContent && (entry as Entry).key.join(', ').toLowerCase().includes(filter.toLowerCase())) {
+      if((entry as Entry).key.join(', ').toLowerCase().includes(filter.toLowerCase())) {
         return true;
       }
 
-      if(filterContent && (entry as Entry).keysecondary.join(', ').toLowerCase().includes(filter.toLowerCase())) {
+      if((entry as Entry).keysecondary.join(', ').toLowerCase().includes(filter.toLowerCase())) {
         return true;
       }
 
@@ -62,7 +63,9 @@ export default function EntryForm() {
 
   const addNewEntry = () => {
     if (!jsonData) return;
-    if(jsonData.Entries === null || jsonData.Entries === undefined) jsonData.entries = {};
+    if(jsonData.entries === null || jsonData.entries === undefined) {
+      jsonData.entries = {};
+    };
     var newId = String(
       Math.max(...Object.keys(jsonData.entries).map(Number)) + 1
     );
@@ -134,107 +137,100 @@ export default function EntryForm() {
     return [...t, ...n].join(', ');
   };
 
-  return (
-    <div className="grid grid-cols-4 gap-4 p-4">
-      {/* Sidebar */}
-      <div className="col-span-1 border-r pr-4">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-semibold">Entries</h3>
-          <button
-            onClick={addNewEntry}
-            className="p-1 rounded-full hover:bg-gray-100"
-            title="Add new entry"
-          >
-            <Plus className="h-5 w-5 text-blue-600" />
-          </button>
-        </div>
-      
-        {/* Search */}
-        <div className="mb-4 flex justify-between items-center mb-3">
-          <input
-            type="text"
-            value={filter || ''}
-            onChange={(e) =>setFilter(e.target.value)}
-            placeholder='Search...'
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 flex-grow"
-          />
-          <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={filterContent ||  false}
-                  title="Search inside content and keys of Entry."
-                  onChange={(e) =>setFilterContent(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-2"
-                />
-              </label>
-        </div>
+  console.log();
 
-        {/* Entry List */}
-        <div className="space-y-2">
-          {jsonData && filter !== undefined &&
-            filterEntries().map(([id, entry]) => (
-              <div key={id} className="flex items-center group">
-                <button
-                  onClick={() => setSelectedEntry(id)}
-                  className={`flex-grow text-left p-2 rounded ${
-                    selectedEntry === id ? 'bg-blue-100' : 'hover:bg-gray-100'
-                  }`}
-                >
-                  {entry.comment || `Entry ${id}`}
-                </button>
-                <button
-                  onClick={() => removeEntry(id)}
-                  className="p-1 rounded-full hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Remove entry"
-                >
-                  <X className="h-4 w-4 text-red-600" />
-                </button>
-              </div>
-            ))}
-        </div>
-      </div>
+  return (
+    <Grid columns={24}>
+      {/* Sidebar */}
+      <Grid.Col span={6} className="border-r">
+        <Container px={12} py={24}>
+          <div className="flex justify-between items-center mb-3">
+            <Title order={4}>Entries</Title>
+            <Button title="Add new entry" onClick={addNewEntry} className="rounded-full" px="10"><PlusIcon  size={14} /></Button>
+          </div>
+        
+          {/* Search */}
+          <div className="mb-4">
+            <TextInput
+              value={filter || ''}
+              onChange={(e) =>setFilter(e.target.value)}
+              rightSection={filter !== '' ? <Input.ClearButton onClick={() => setFilter('')} /> : undefined}
+              rightSectionPointerEvents="auto"
+              placeholder='Search...'
+              mb="8"
+            />
+            {/* <Switch
+              type="checkbox"
+              checked={filterContent ||  false}
+              title="Search inside content and keys of Entry."
+              onChange={(e) =>setFilterContent(e.target.checked)}
+              label="Search in Content"
+              mx="4"
+            /> */}
+          </div>
+
+          {/* Entry List */}
+          <div className="space-y-2">
+            {jsonData && filter !== undefined && jsonData.entries !== undefined &&
+              filterEntries().map(([id, entry]) => (
+                <div key={id} className="flex items-center group">
+                  <Button 
+                  fullWidth 
+                  onClick={() => setSelectedEntry(id)} variant={selectedEntry === id ? 'light' : 'white'} 
+                  >{entry.comment || `Entry ${id}`}</Button>
+                  {selectedEntry === id && (
+                    <Button ml="4" onClick={() => removeEntry(id)} variant="light" color="red"><X className="h-4 w-4"/></Button>
+                  )}
+                </div>
+              ))}
+          </div>
+        </Container>
+      </Grid.Col>
 
       {/* Content */}
-      <div className="col-span-3">
-        {selectedEntry != null && jsonData ? (
-          <div className="space-y-4">
+      <Grid.Col span={"auto"}>
+        {selectedEntry != null && 
+        jsonData && 
+        jsonData.entries !== undefined && 
+        jsonData.entries !== null ? (
+          <Container  px={12} py={24}>
             {/* Top Row */}
-            <div className="flex grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-lg font-semibold">Edit Entry</h3>
-              </div>
-              {/* Disabled */}
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={currentEntry().disable}
-                  onChange={(e) =>
-                    updateEntry(selectedEntry, 'disable', e.target.checked)
-                  }
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-2"
-                />
-                <span className="ml-2 text-sm text-gray-600">Disabled</span>
-              </label>
-              <div className="flex-grow">
-                <input
+            <Grid columns={6}>
+              <Grid.Col span={1}>
+                <Title order={4}>Edit Entry</Title>
+              </Grid.Col>
+              {/* Comment */}
+              <Grid.Col span={4}>
+                <TextInput
                   type="text"
                   value={currentEntry().comment}
                   onChange={(e) =>
-                    updateEntry(selectedEntry, 'comment', e.target.value)
+                    updateEntry(selectedEntry, 'comment', e)
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 flex-grow"
+                  placeholder='Comment'
+                  className="flex-grow"
                 />
-              </div>
-            </div>
+              </Grid.Col>
+              {/* Disabled */}
+              <Grid.Col span={1}>
+              <Switch
+                  type="checkbox"
+                  checked={!currentEntry().disable}
+                  onChange={(e) =>
+                    updateEntry(selectedEntry, 'disable', !e.currentTarget.checked)
+                  }
+                  mx="4"
+                /> 
+              </Grid.Col>
+            </Grid>
 
-            {/* Second Row */}
-            <div className="grid grid-cols-8 gap-4">
-              <div className="col-span-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Keys
-                </label>
-                <input
+            {/* Keys Row */}
+            <Grid columns={2}>
+              {/* Keys */}
+              <Grid.Col span={2}>
+                <TextInput
                   type="text"
+                  label="Keys"
                   value={currentEntry().key.join(', ')}
                   onChange={(e) =>
                     updateEntry(
@@ -243,79 +239,178 @@ export default function EntryForm() {
                       e.target.value.split(',').map((k) => k.trim())
                     )
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder='Key, Key...'
                 />
-              </div>
+              </Grid.Col>
+            </Grid>
 
+            {/* Third Row */}
+            <Grid columns={4}>
               {/* Order */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Order
-                </label>
-                <input
-                  type="number"
+              <Grid.Col span={1}>
+              <NumberInput
                   value={currentEntry().order}
                   onChange={(e) =>
                     updateEntry(
                       selectedEntry,
                       'order',
-                      parseInt(e.target.value)
+                      typeof e === 'number' ? e : parseInt(e) || 0
                     )
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
+                  max={100}
+                  min={0}
+                  placeholder='100'
+                  label="Order"
                 />
-              </div>
+              </Grid.Col>
 
               {/* Logic */}
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Logic
-                </label>
-                <select
-                  value={currentEntry().selectiveLogic}
+              <Grid.Col span={1}>
+                <Select
+                  value={UseGlobalOptionsArray[currentEntry().selectiveLogic]}
                   onChange={(e) =>
                     updateEntry(
                       selectedEntry,
                       'selectiveLogic',
-                      parseInt(e.target.value)
+                      mapUseGlobalOptions(e)
                     )
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
-                >
-                  {Object.entries(UseGlobalOptions).map(([i, obj]) => (
-                    <option value={obj.value}>{obj.label}</option>
-                  ))}
-                </select>
-              </div>
+                  searchable
+                  label="Logic"
+                  placeholder="Pick value"
+                  data={[...UseGlobalOptionsArray]}
+                />
+              </Grid.Col>
 
               {/* Probability */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Probability
-                </label>
-                <input
-                  type="number"
+              <Grid.Col span={1}>
+              <NumberInput
                   value={currentEntry().probability}
                   onChange={(e) =>
                     updateEntry(
                       selectedEntry,
                       'probability',
-                      parseInt(e.target.value)
+                      typeof e === 'number' ? e : parseInt(e) || 0
                     )
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
+                  max={100}
+                  min={0}
+                  placeholder='100'
+                  label="Probability"
                 />
-              </div>
+              </Grid.Col>
+              {/* Scan Depth */}
+              <Grid.Col span={1}>
+                <NumberInput
+                    value={currentEntry().depth}
+                    onChange={(e) =>
+                      updateEntry(
+                        selectedEntry,
+                        'depth',
+                        typeof e === 'number' ? e : parseInt(e) || 0
+                      )
+                    }
+                    max={100}
+                    min={0}
+                    placeholder='100'
+                    label="Scan Depth"
+                  />
+              </Grid.Col>
+            </Grid>
+
+            {/* Content */}
+            <div>
+              <Textarea 
+                variant="filled"
+                label="Content"
+                value={currentEntry().content}
+                onChange={(e) =>
+                  updateEntry(selectedEntry, 'content', e.currentTarget.value)
+                }
+                autosize
+                minRows={4}
+                maxRows={8}
+              />
             </div>
 
-            <div className="grid grid-cols-8 gap-4">
+            {/* Fifth Row */}
+            <Grid columns={4}>
+              {/* Group Weight  */}
+              <Grid.Col span={1}>
+                <NumberInput
+                    value={currentEntry().groupWeight}
+                    onChange={(e) =>
+                      updateEntry(
+                        selectedEntry,
+                        'groupWeight',
+                        typeof e === 'number' ? e : parseInt(e) || 0
+                      )
+                    }
+                    max={100}
+                    min={0}
+                    placeholder='100'
+                    label="Group Weight"
+                  />
+              </Grid.Col>
+              {/* Sticky  */}
+              <Grid.Col span={1}>
+                  <NumberInput
+                      value={currentEntry().sticky}
+                      onChange={(e) =>
+                        updateEntry(
+                          selectedEntry,
+                          'sticky',
+                          typeof e === 'number' ? e : parseInt(e) || 0
+                        )
+                      }
+                      max={100}
+                      min={0}
+                      placeholder='100'
+                      label="Sticky"
+                    />
+              </Grid.Col>
+              {/* Cooldown  */}
+              <Grid.Col span={1}>
+                  <NumberInput
+                      value={currentEntry().cooldown}
+                      onChange={(e) =>
+                        updateEntry(
+                          selectedEntry,
+                          'cooldown',
+                          typeof e === 'number' ? e : parseInt(e) || 0
+                        )
+                      }
+                      max={100}
+                      min={0}
+                      placeholder='100'
+                      label="Cooldown"
+                    />
+              </Grid.Col>
+              {/* Delay  */}
+              <Grid.Col span={1}>
+                  <NumberInput
+                      value={currentEntry().delay}
+                      onChange={(e) =>
+                        updateEntry(
+                          selectedEntry,
+                          'delay',
+                          typeof e === 'number' ? e : parseInt(e) || 0
+                        )
+                      }
+                      max={100}
+                      min={0}
+                      placeholder='100'
+                      label="Delay"
+                    />
+              </Grid.Col>
+            </Grid>
+
+            {/* Optional Filter */}
+            <div>
               {/* Optional Filter */}
-              <div className="col-span-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Optional Filter
-                </label>
-                <input
+                <TextInput
                   type="text"
+                  label="Optional Filter"
                   value={currentEntry().keysecondary.join(', ')}
                   onChange={(e) =>
                     updateEntry(
@@ -324,189 +419,69 @@ export default function EntryForm() {
                       e.target.value.split(',').map((k) => k.trim())
                     )
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder='Key, Key...'
                 />
-              </div>
-              {/* Scan Depth */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Scan Depth
-                </label>
-                <input
-                  type="number"
-                  value={currentEntry().depth}
-                  onChange={(e) =>
-                    updateEntry(
-                      selectedEntry,
-                      'depth',
-                      parseInt(e.target.value)
-                    )
-                  }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
-                />
-              </div>
             </div>
-
-            {/* Content */}
+            {/* Inclusion Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Content
-              </label>
-              <textarea
-                value={currentEntry().content}
-                onChange={(e) =>
-                  updateEntry(selectedEntry, 'content', e.target.value)
-                }
-                rows={10}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
-              />
-            </div>
-
-            <div className="grid grid-cols-12 gap-4">
               {/* Inclusion Group */}
-              <div className="col-span-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Inclusion Group
-                </label>
-                <input
+                <TextInput
                   type="text"
+                  label="Inclusion Group"
+                  disabled={true}
                   value={currentEntry().group}
                   onChange={(e) =>
                     updateEntry(
                       selectedEntry,
                       'group',
-                      e.target.value.split(',').map((k) => k.trim())
+                      e.target.value
                     )
                   }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  placeholder='Key, Key...'
                 />
-              </div>
-              {/* Scan Depth */}
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Group Weight
-                </label>
-                <input
-                  type="number"
-                  value={currentEntry().groupWeight}
-                  onChange={(e) =>
-                    updateEntry(
-                      selectedEntry,
-                      'groupWeight',
-                      parseInt(e.target.value)
-                    )
-                  }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
-                />
-              </div>
-              {/* Sticky  */}
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Sticky
-                </label>
-                <input
-                  type="number"
-                  value={currentEntry().sticky}
-                  onChange={(e) =>
-                    updateEntry(
-                      selectedEntry,
-                      'sticky',
-                      parseInt(e.target.value)
-                    )
-                  }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
-                />
-              </div>
-              {/* Cooldown  */}
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Cooldown
-                </label>
-                <input
-                  type="number"
-                  value={currentEntry().cooldown}
-                  onChange={(e) =>
-                    updateEntry(
-                      selectedEntry,
-                      'cooldown',
-                      parseInt(e.target.value)
-                    )
-                  }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
-                />
-              </div>
-              {/* Delay  */}
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Delay
-                </label>
-                <input
-                  type="number"
-                  value={currentEntry().delay}
-                  onChange={(e) =>
-                    updateEntry(
-                      selectedEntry,
-                      'delay',
-                      parseInt(e.target.value)
-                    )
-                  }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
-                />
-              </div>
             </div>
 
-            {/* Fourth Row */}
-            <div className="grid grid-cols-6 space-x-4">
+            {/* Sixth Row */}
+            <Grid columns={6}>
               {/* Filter to Character */}
-              <div className="col-span-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  Filter to Character or Tags
-                </label>
-                <input
+              <Grid.Col span={6}>
+                <TextInput
                   type="text"
-                  value={filters()}
+                  label="Filter to Character or Tags"
                   disabled={true}
-                  onChange={(e) =>
-                    // updateEntry(selectedEntry,'characterFilter.names',e.target.value.split(',').map((k) => k.trim()))
-                    console.log(
-                      'Editing of the characterFilter field is not supported at the time.'
-                    )
-                  }
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  value={filters()}
+                  onChange={() =>alert('Editing of the characterFilter field is not supported at the time.')}
+                  placeholder='Key, Key...'
                 />
-              </div>
+              </Grid.Col>
               {/* Constant */}
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
+              <Grid.Col span={1}>
+              <Checkbox
+                  label="Constant"
                   checked={currentEntry().constant}
                   onChange={(e) =>
                     updateEntry(selectedEntry, 'constant', e.target.checked)
                   }
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50  px-2"
                 />
-                <span className="ml-2 text-sm text-gray-600">Constant</span>
-              </label>
+              </Grid.Col>
               {/* Selective */}
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
+              <Grid.Col span={1}>
+              <Checkbox
+                  label="Selective"
                   checked={currentEntry().selective}
                   onChange={(e) =>
                     updateEntry(selectedEntry, 'selective', e.target.checked)
                   }
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-2"
                 />
-                <span className="ml-2 text-sm text-gray-600">Selective</span>
-              </label>
-            </div>
-          </div>
+              </Grid.Col>
+            </Grid>
+          </Container>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-500">
             Select an entry to edit
           </div>
         )}
-      </div>
-    </div>
+      </Grid.Col>
+    </Grid>
   );
 }

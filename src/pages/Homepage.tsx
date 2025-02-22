@@ -1,31 +1,27 @@
 import { useContext } from 'react';
 import { HooksContext } from '../hooks';
+import { Divider, Title } from '@mantine/core';
+
+import { UploadZone } from './../components/UploadZone.tsx';
+import { FileWithPath } from '@mantine/dropzone';
 
 export default function Homepage() {
-  const { setJsonData, setTabIndex, loadedLorebook, setLoadedLorebook, handleFileUpload } = useContext(HooksContext);
+  const { loadedLorebook, handleFileUpload } = useContext(HooksContext);
 
+  const onDrop = (e: FileWithPath[]) => {
+    console.log(e);
+    handleFileUpload(e[0])
+  }
 
   return (
     <div className="p-4">
       {loadedLorebook && (
         <div>
-          <h3 className="text-2xl font-bold">Loaded Lorebook: {loadedLorebook}</h3>
-          <hr className="my-4"/>
+          <Title order={2}>Loaded Lorebook: {loadedLorebook}</Title>
+          <Divider my="md" />
         </div>
       )}
-      {/* <h2 className="text-lg font-semibold mb-4">Load JSON File</h2> */}
-      <div className="max-w-md mx-auto border-4 border-solid border-blue-300 p-4 rounded-lg bg-blue-50 hover:bg-blue-100 flex justify-content text-center">
-        <div className="mx-auto py-4">
-          <label htmlFor="files" className="border-0 text-md font-semibold text-blue-500">Load JSON File</label>
-          <input
-            type="file"
-            id="files"
-            accept=".json"
-            onChange={handleFileUpload}
-            className="flex-grow block w-full text-sm text-gray-500 file:hidden file:text-center hidden text-center"
-          />
-        </div>
-      </div>
+      <UploadZone onDrop={onDrop}/>
     </div>
   );
 }

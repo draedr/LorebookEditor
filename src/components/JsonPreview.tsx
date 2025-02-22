@@ -1,46 +1,29 @@
 import { useContext, useState } from "react";
 import { HooksContext } from "../hooks";
+import { Accordion, AccordionControl, Container, ScrollArea } from "@mantine/core";
+import { CodeHighlight } from '@mantine/code-highlight';
 
 export default function JsonPreview() {
     const { jsonData } = useContext(HooksContext);
 
-    const [fieldsetState, setFieldsetState] = useState<boolean>(false);
-
-    const toggleFieldset = () => {
-        if (fieldsetState) {
-        setFieldsetState(false);
-        } else {
-        setFieldsetState(true);
-        }
-    };
-
     return (
-        <fieldset
-        className={`overflow-x-auto max-w-6xl my-4 border-solid border-grey rounded-lg p-4 pt-2 ${jsonData != null && fieldsetState
-            ? 'border-2 rounded-lg'
-            : 'border-t-2'
-          }`}
-      >
-        <legend>
-          <button
-            //disabled={!(jsonData != null && fieldsetState)}
-            onClick={() => toggleFieldset()}
-            className={`mx-2 py-1 px-2 rounded-lg opacity-100 transition-opacity"
-          title="Remove entry ${jsonData != null && fieldsetState
-                ? 'hover:bg-white group-hover:opacity-100'
-                : ''
-              }`}
-          >
-            JSON
-          </button>
-        </legend>
-        {jsonData != null && fieldsetState ? (
-          <div>
-            <pre className="max-w-6xl">{JSON.stringify(jsonData, null, 2)}</pre>
-          </div>
-        ) : (
-          fieldsetState && <span>No data available</span>
-        )}
-      </fieldset>
+        <Accordion variant="contained" chevronPosition="left" mx="auto">
+          <Accordion.Item value="item-1" px={0} py={0}>
+            <AccordionControl>JSON</AccordionControl>
+            <Accordion.Panel>
+              <ScrollArea h={300}>
+                {jsonData != null ? (
+                  <CodeHighlight
+                    code={JSON.stringify(jsonData, null, 2)}
+                    language="json"
+                    withCopyButton={false}
+                  />
+                ) : (
+                  <span>No data available</span>
+                )}
+              </ScrollArea>
+            </Accordion.Panel>
+          </Accordion.Item>
+        </Accordion>
     );
 }

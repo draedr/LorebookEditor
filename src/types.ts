@@ -67,9 +67,20 @@ export interface Option {
   label: string;
 }
 
-export const UseGlobalOptions = [
-  { value: 0, label: 'AND ANY' },
-  { value: 1, label: 'AND ALL' },
-  { value: 2, label: 'NOT ANY' },
-  { value: 3, label: 'NOT ALL' },
-];
+export const UseGlobalOptions = {
+  'AND ANY': { value: 0, label: 'AND ANY' },
+  'AND ALL': { value: 1, label: 'AND ALL' },
+  'NOT ANY': { value: 2, label: 'NOT ANY' },
+  'NOT ALL': { value: 3, label: 'NOT ALL' },
+};
+
+export const UseGlobalOptionsArray = [
+  "AND ANY",
+  "AND ALL",
+  "NOT ANY",
+  "NOT ALL"
+]
+
+export const mapUseGlobalOptions = (key: string | null): Option => {
+  return key !== null ? UseGlobalOptions[key].value || 0 : 0;
+}

@@ -3,6 +3,7 @@ import { HooksContext } from '../hooks';
 
 import { OriginalData } from '/src/hooks.ts';
 import { isOriginalData } from '/src/types.ts';
+import { Checkbox, Container, Grid, NumberInput, TextInput } from '@mantine/core';
 
 export default function OriginalForm() {
   const { jsonData, setJsonData } = useContext(HooksContext);
@@ -39,41 +40,31 @@ export default function OriginalForm() {
   return (
     <div>
       {ExtendedOriginalData() ? (
-        <div>
-          <div className="grid grid-cols-6 gap-4 p-4">
+        <Container px={12} py={24}>
+          <Grid columns={2}>
             {/* Name */}
-            <div className="col-span-2">
+            <Grid.Col span={1}>
               <div className="space-y-4">
                 {/* Content */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <input
-                    type="text"
+                  <TextInput
+                    label="Name"
                     value={oData().name}
-                    onChange={(e) => updateEntry('name', e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+                    onChange={(e) => updateEntry('name', e.currentTarget.value)}
                   />
                 </div>
               </div>
-            </div>
+            </Grid.Col>
             {/* Description */}
-            <div className="col-span-4">
+            <Grid.Col span={1}>
               {jsonData.originalData != null ? (
                 <div className="space-y-4">
                   {/* Content */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Description
-                    </label>
-                    <input
-                      type="text"
+                    <TextInput
+                      label="Description"
                       value={oData().description}
-                      onChange={(e) =>
-                        updateEntry('description', e.target.value)
-                      }
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2"
+                      onChange={(e) => updateEntry('description', e.currentTarget.value)}
                     />
                   </div>
                 </div>
@@ -82,85 +73,55 @@ export default function OriginalForm() {
                   No Original Data present
                 </div>
               )}
-            </div>
-          </div>
-          <div className="grid grid-cols-5 gap-4 p-4">
+            </Grid.Col>
+          </Grid>
+          <Grid columns={5}>
             {/* Scan Depth */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Scan Depth
-              </label>
-              <input
-                type="number"
+            <Grid.Col span={1}>
+              <NumberInput 
+                label="Scan Depth"
                 value={oData().scan_depth}
-                onChange={(e) => updateEntry('scan_depth', e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
+                onChange={(e) => updateEntry('scan_depth', e)}
               />
-            </div>
+            </Grid.Col>
             {/* Token Budget */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Token Budget
-              </label>
-              <input
-                type="number"
+            <Grid.Col span={1}>
+              <NumberInput 
+                label="Token Budget"
                 value={oData().token_budget}
-                onChange={(e) => updateEntry('token_budget', e.target.value)}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
+                onChange={(e) => updateEntry('token_budget', e)}
               />
-            </div>
-            {/* Recursive Scanning */}
-            <div>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={oData().recursive_scanning}
-                  onChange={(e) =>
-                    updateEntry('recursive_scanning', e.target.value)
-                  }
-                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50  px-2"
-                />
-                <span className="ml-2 text-sm text-gray-600">
-                  Recursive Scanning
-                </span>
-              </label>
-            </div>
+            </Grid.Col>
             {/* Extensions */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Extensions
-              </label>
-              <input
-                type="number"
-                disabled={false}
+            <Grid.Col span={1}>
+              <NumberInput 
+                label="Extensions"
                 value={Object.keys(oData().extensions).length}
-                onChange={(e) =>
-                  console.log(
-                    'Editing of the extensions field is not supported at the time.'
-                  )
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
+                disabled={true}
+                onChange={(e) => alert('Editing of the extensions field is not supported at the time.')}
               />
-            </div>
+            </Grid.Col>
             {/* Entries */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Entries
-              </label>
-              <input
-                type="number"
+            <Grid.Col span={1}>
+              <NumberInput 
+                label="Entries"
                 value={oData().entries.length}
-                disabled={false}
-                onChange={(e) =>
-                  console.log(
-                    'Editing of the original entries field is not supported at the time.'
-                  )
-                }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2"
+                disabled={true}
+                onChange={(e) => alert('Editing of the original entries field is not supported at the time.')}
               />
-            </div>
-          </div>
-        </div>
+            </Grid.Col>
+            {/* Recursive Scanning */}
+            <Grid.Col span={1}>
+                          <Checkbox
+                              label="Recursive Scanning"
+                              checked={oData().recursive_scanning}
+                              onChange={(e) =>
+                                updateEntry('recursive_scanning', e.target.checked)
+                              }
+                            />
+            </Grid.Col>
+          </Grid>
+        </Container>
       ) : (
         <div className="flex items-center justify-center h-full text-gray-500">
           No Original Data present

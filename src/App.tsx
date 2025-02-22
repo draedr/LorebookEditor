@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
+import { Card, Container, MantineProvider, Tabs, Title } from '@mantine/core';
+import '@mantine/code-highlight/styles.css';
 
 import { useHooks, HooksContext } from './hooks.ts';
 
@@ -11,49 +10,56 @@ import OriginalForm from './pages/OriginalForm.tsx';
 import AboutPage from './pages/AboutPage.tsx';
 import JsonPreview from './components/JsonPreview.tsx';
 
+import '@mantine/core/styles.css';
+
 function App() {
   const hooks = useHooks();
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <HooksContext.Provider value={hooks}>
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-semibold mb-8">
-            SillyTavern Lorebook Editor
-          </h1>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <Tabs
-              selectedIndex={hooks.tabIndex}
-              onSelect={(index) => hooks.setTabIndex(index)}
-            >
-              <TabList>
-                <Tab>Load JSON</Tab>
-                <Tab>Edit Entries</Tab>
-                <Tab>Edit Original Data</Tab>
-                <Tab>Export</Tab>
-                <Tab>About</Tab>
-              </TabList>
+      <MantineProvider>
+        <HooksContext.Provider value={hooks}>
+          <div className="max-w-6xl mx-auto">
+            <Container mb={24}>
+              <Title>SillyTavern Lorebook Editor</Title>
+            </Container>
+            <Card mb={24} withBorder shadow="sm" radius="md">
+              <Tabs
+                defaultValue={"loadjson"}
+                value={hooks.tabIndex}
+                onChange={hooks.setTabIndex}
+              >
+                <Card.Section>
+                  <Tabs.List grow justify="center">
+                    <Tabs.Tab py="md" value="loadjson">Load JSON</Tabs.Tab>
+                    <Tabs.Tab py="md" value="editentries">Edit Entries</Tabs.Tab>
+                    <Tabs.Tab py="md" value="edotpriginaldata">Edit Original Data</Tabs.Tab>
+                    <Tabs.Tab py="md" value="export">Export</Tabs.Tab>
+                    <Tabs.Tab py="md" value="about">About</Tabs.Tab>
+                  </Tabs.List>
+                </Card.Section>
 
-              <TabPanel>
-                <Homepage />
-              </TabPanel>
-              <TabPanel>
-                <EntryForm />
-              </TabPanel>
-              <TabPanel>
-                <OriginalForm />
-              </TabPanel>
-              <TabPanel>
-                <ExportPage />
-              </TabPanel>
-              <TabPanel>
-                <AboutPage />
-              </TabPanel>
-            </Tabs>
+                <Tabs.Panel value="loadjson">
+                  <Homepage />
+                </Tabs.Panel>
+                <Tabs.Panel value="editentries">
+                  <EntryForm />
+                </Tabs.Panel>
+                <Tabs.Panel value="edotpriginaldata">
+                  <OriginalForm />
+                </Tabs.Panel>
+                <Tabs.Panel value="export">
+                  <ExportPage />
+                </Tabs.Panel>
+                <Tabs.Panel value="about">
+                  <AboutPage />
+                </Tabs.Panel>
+              </Tabs>
+            </Card >
+            <JsonPreview />
           </div>
-          <JsonPreview />
-        </div>
-      </HooksContext.Provider>
+        </HooksContext.Provider>
+      </MantineProvider>
     </div>
   );
 }

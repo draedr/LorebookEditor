@@ -8,7 +8,8 @@ export const storageItems = {
   jsonData: "jsonData",
   loadedLorebook: "loadedLorebook",
   originalLorebook: "originalLorebook",
-  tabIndex: "tabIndex"
+  tabIndex: "tabIndex",
+  tags: "tags"
 }
 
 export function useHooks() {
@@ -39,28 +40,64 @@ export function useHooks() {
     return selectedOption;
   };
   const getTabIndexState = () => {
-    const selectedOption: number = Number(localStorage.getItem(storageItems.tabIndex) || '0') || 0
+    const selectedOption: string = localStorage.getItem(storageItems.tabIndex) || '0';
     return selectedOption;
   };
+  // const getTagsState = () => {
+  //   var selectedOption: string[] = JSON.parse(localStorage.getItem(storageItems.tags) || 'null') || [];
+  //   if(!Array.isArray(selectedOption) || typeof selectedOption === 'string') selectedOption = [selectedOption];
+  //   return selectedOption;
+  // };
+
+  const loadTagsFromJsonData = () => {
+    if(jsonData?.entries === null || jsonData?.entries === undefined) return [];
+
+    var t: string[] = Object.keys( jsonData.entries|| {}).map((e: number) => {
+      var entry = jsonData.entries[e];
+      return (entry?.key || []);
+    }).flat().filter((value, index, array) => {
+      return array.indexOf(value) === index;
+    });
+    return t;
+  }
 
   const [jsonData, setJsonDataSimple] = useState<JsonData | null>(getJsonDataState());
   const [loadedLorebook, setLoadedLorebookSimple] = useState<string | null>(getLoadedLorebookState());
   const [originalData, setOriginalDataSimple] = useState<JsonData | null>(getOriginalDataState());
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
-  const [tabIndex, setTabIndexSimple] = useState(getTabIndexState());
+  const [tabIndex, setTabIndexSimple] = useState(getTabIndexState() || null);
+  const [tags, setTags] = useState<string[]>(loadTagsFromJsonData());
+
+  const reset = () => {
+    resetStorage();
+    setJsonData(getJsonDataState());
+    setLoadedLorebook(getLoadedLorebookState());
+    setSelectedEntry(null);
+    setTabIndex(getTabIndexState());
+    setTags(loadTagsFromJsonData());
+    setTabIndex('loadjson')
+  }
+  const resetStorage = () => {
+    setOriginalDataSimple(null);
+    localStorage.removeItem(storageItems.jsonData);
+    localStorage.removeItem(storageItems.loadedLorebook);
+    localStorage.removeItem(storageItems.originalLorebook); 
+    localStorage.removeItem(storageItems.tabIndex); 
+    localStorage.removeItem(storageItems.tags); 
+  }
 
   const setJsonData = ( d: JsonData ) => {
       localStorage.setItem( storageItems.jsonData, JSON.stringify(d) );
       setJsonDataSimple({...d});
   }
 
-  const setTabIndex = ( i: number ) => {
-    localStorage.setItem( storageItems.tabIndex, JSON.stringify(i) );
+  const setTabIndex = ( i: string | null ) => {
+    localStorage.setItem( storageItems.tabIndex, i || 'null');
     setTabIndexSimple(i);
   }
 
-  const setLoadedLorebook = ( f: string ) => {
-      localStorage.setItem( storageItems.loadedLorebook, f );
+  const setLoadedLorebook = ( f: string | null) => {
+      localStorage.setItem( storageItems.loadedLorebook, typeof f !== 'string' ? JSON.stringify(f) : f );
       setLoadedLorebookSimple(f);
   }
 
@@ -74,19 +111,20 @@ export function useHooks() {
     const lodadedLorebookInStorage = getLoadedLorebookState();
     setJsonDataSimple(jsonDataInStorage);
     setLoadedLorebookSimple(lodadedLorebookInStorage);
+    setSelectedEntry(null);
   }
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileUpload = (file: File) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const data = <JsonData>JSON.parse(e.target?.result as string);
           setJsonData(data);
-          setTabIndex(1); // Switch to Edit Entries tab
+          setTabIndex('editentries'); // Switch to Edit Entries tab
           setLoadedLorebook(file.name);
           setOriginalData(data);
+          setTags(loadTagsFromJsonData());
         } catch (error) {
           alert('Error parsing JSON file');
         }
@@ -95,7 +133,7 @@ export function useHooks() {
     }
   };
 
-  
+
   return {
     jsonData,
     setJsonData,
@@ -108,7 +146,12 @@ export function useHooks() {
     SyncFromStorage,
     handleFileUpload,
     originalData,
-    setOriginalData
+    setOriginalData,
+    tags,
+    setTags,
+    loadTagsFromJsonData,
+    reset,
+    resetStorage
   };
 }
 
