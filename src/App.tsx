@@ -14,16 +14,6 @@ import JsonPreview from './components/JsonPreview.tsx';
 function App() {
   const hooks = useHooks();
 
-  const [fieldsetState, setFieldsetState] = useState<boolean>(false);
-
-  const toggleFieldset = () => {
-    if (fieldsetState) {
-      setFieldsetState(false);
-    } else {
-      setFieldsetState(true);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <HooksContext.Provider value={hooks}>

@@ -7,7 +7,8 @@ export type { Entry, JsonData };
 export const storageItems = {
   jsonData: "jsonData",
   loadedLorebook: "loadedLorebook",
-  originalLorebook: "originalLorebook"
+  originalLorebook: "originalLorebook",
+  tabIndex: "tabIndex"
 }
 
 export function useHooks() {
@@ -37,16 +38,25 @@ export function useHooks() {
     const selectedOption: string | null = localStorage.getItem(storageItems.loadedLorebook) || null
     return selectedOption;
   };
+  const getTabIndexState = () => {
+    const selectedOption: number = Number(localStorage.getItem(storageItems.tabIndex) || '0') || 0
+    return selectedOption;
+  };
 
   const [jsonData, setJsonDataSimple] = useState<JsonData | null>(getJsonDataState());
   const [loadedLorebook, setLoadedLorebookSimple] = useState<string | null>(getLoadedLorebookState());
   const [originalData, setOriginalDataSimple] = useState<JsonData | null>(getOriginalDataState());
   const [selectedEntry, setSelectedEntry] = useState<string | null>(null);
-  const [tabIndex, setTabIndex] = useState(0);
+  const [tabIndex, setTabIndexSimple] = useState(getTabIndexState());
 
   const setJsonData = ( d: JsonData ) => {
       localStorage.setItem( storageItems.jsonData, JSON.stringify(d) );
       setJsonDataSimple({...d});
+  }
+
+  const setTabIndex = ( i: number ) => {
+    localStorage.setItem( storageItems.tabIndex, JSON.stringify(i) );
+    setTabIndexSimple(i);
   }
 
   const setLoadedLorebook = ( f: string ) => {

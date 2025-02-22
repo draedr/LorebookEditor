@@ -14,7 +14,7 @@ export default function Homepage() {
         </div>
       )}
       {/* <h2 className="text-lg font-semibold mb-4">Load JSON File</h2> */}
-      <div className="max-w-md mx-auto border-4 border-dashed border-blue-300 p-4 rounded-lg bg-blue-50 hover:bg-blue-100 flex justify-content text-center">
+      <div className="max-w-md mx-auto border-4 border-solid border-blue-300 p-4 rounded-lg bg-blue-50 hover:bg-blue-100 flex justify-content text-center">
         <div className="mx-auto py-4">
           <label htmlFor="files" className="border-0 text-md font-semibold text-blue-500">Load JSON File</label>
           <input

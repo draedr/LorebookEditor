@@ -13,6 +13,7 @@ export default function EntryForm() {
   const [filterContent, setFilterContent] = useState<boolean | null>(false);
 
   const filterEntries = () => {
+    if(jsonData.entries === null || jsonData.entries === undefined) return [];
     var final;
 
     if(filter !== null || filter !== ' ' || filter !== '' || typeof filter !== 'string')
@@ -42,7 +43,6 @@ export default function EntryForm() {
       return false;
     });
 
-    console.log(final);
     return final;
   }
   
@@ -62,6 +62,7 @@ export default function EntryForm() {
 
   const addNewEntry = () => {
     if (!jsonData) return;
+    if(jsonData.Entries === null || jsonData.Entries === undefined) jsonData.entries = {};
     var newId = String(
       Math.max(...Object.keys(jsonData.entries).map(Number)) + 1
     );
@@ -464,7 +465,7 @@ export default function EntryForm() {
                 <input
                   type="text"
                   value={filters()}
-                  disabled="true"
+                  disabled={true}
                   onChange={(e) =>
                     // updateEntry(selectedEntry,'characterFilter.names',e.target.value.split(',').map((k) => k.trim()))
                     console.log(

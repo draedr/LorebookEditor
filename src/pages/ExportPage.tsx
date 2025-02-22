@@ -9,7 +9,6 @@ export default function ExportPage() {
 
 
   const handleExportOriginal = () => {
-    console.log(originalData);
     handleExportGeneric(originalData, 'original_');
   }
   
