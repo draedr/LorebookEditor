@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { HooksContext } from '../hooks';
 import { Plus, X } from 'lucide-react';
 
@@ -9,6 +9,43 @@ export default function EntryForm() {
   const { jsonData, selectedEntry, setSelectedEntry, setJsonData } =
     useContext(HooksContext);
 
+  const [filter, setFilter] = useState<string | null>('');
+  const [filterContent, setFilterContent] = useState<boolean | null>(false);
+
+  const filterEntries = () => {
+    var final;
+
+    if(filter !== null || filter !== ' ' || filter !== '' || typeof filter !== 'string')
+      final = Object.entries(jsonData.entries);
+
+    final =  Object.entries(jsonData.entries).filter(([id, entry]) => {
+      if((entry as Entry).comment.toLowerCase().includes(filter.toLowerCase())) {
+        return true;
+      }
+
+      if(filterContent && (entry as Entry).content.toLowerCase().includes(filter.toLowerCase())) {
+        return true;
+      }
+
+      if(filterContent && (entry as Entry).key.join(', ').toLowerCase().includes(filter.toLowerCase())) {
+        return true;
+      }
+
+      if(filterContent && (entry as Entry).keysecondary.join(', ').toLowerCase().includes(filter.toLowerCase())) {
+        return true;
+      }
+
+      if ((entry as Entry).key.filter((k) => {if(k.toLowerCase().includes(filter.toLowerCase())) { return true; }}).length > 0) {
+        return true;
+      }
+
+      return false;
+    });
+
+    console.log(final);
+    return final;
+  }
+  
   const updateEntry = (entryId: string, field: keyof Entry, value: any) => {
     if (!jsonData) return;
     setJsonData({
@@ -110,9 +147,31 @@ export default function EntryForm() {
             <Plus className="h-5 w-5 text-blue-600" />
           </button>
         </div>
+      
+        {/* Search */}
+        <div className="mb-4 flex justify-between items-center mb-3">
+          <input
+            type="text"
+            value={filter || ''}
+            onChange={(e) =>setFilter(e.target.value)}
+            placeholder='Search...'
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 flex-grow"
+          />
+          <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={filterContent ||  false}
+                  title="Search inside content and keys of Entry."
+                  onChange={(e) =>setFilterContent(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 px-2"
+                />
+              </label>
+        </div>
+
+        {/* Entry List */}
         <div className="space-y-2">
-          {jsonData &&
-            Object.entries(jsonData.entries).map(([id, entry]) => (
+          {jsonData && filter !== undefined &&
+            filterEntries().map(([id, entry]) => (
               <div key={id} className="flex items-center group">
                 <button
                   onClick={() => setSelectedEntry(id)}
